@@ -13,7 +13,7 @@ public class ConsoleWriter implements ItemWriter<EquityImporter>{
     @Override
     public void write(List<? extends EquityImporter> list) throws Exception {
         for (EquityImporter object : list){
-            System.out.println(object.toString());
+            System.out.println(object.getSymbol());
         }
     }
 }

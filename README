@@ -1,1 +1,2 @@
-This file was created by IntelliJ IDEA (Leda) IU-129.961 for binding GitHub repository
+This is an example for Spring Batch.
+The application read a file containing the list of the name of equities and show them.

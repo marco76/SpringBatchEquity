@@ -3,28 +3,31 @@
        xmlns:batch="http://www.springframework.org/schema/batch"
        xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/batch
            http://www.springframework.org/schema/batch/spring-batch-2.2.xsd">
 
-
+    <!-- spring already has a standard flat file reader -->
     <bean id = "symbolItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
-        <property name="resource" value="file:/Users/marco/Documents/test/nyse.csv"/>
+        <!-- the name of the file in the resources directory that contains the symbols -->
+        <property name="resource" value="nyse.csv"/>
+        <!-- the first line contains the name of the columns, skip it -->
         <property name="linesToSkip" value="1"/>
+        <!-- we use a default line mapper, each line is transformed in a predefined bean -->
         <property name="lineMapper">
             <bean class = "org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <!-- map of the fields -->
                 <property name="fieldSetMapper" ref="symbolFieldSetMapper"/>
                 <property name="lineTokenizer" ref="symbolLineTokenizer"/>
             </bean>
-
-        </property>
-
-
+       </property>
     </bean>
+
+    <!-- spring require a transaction manager -->
     <bean id="transactionManager"
           class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
 
+    <!-- spring requires a job launcher -->
     <bean id = "jobLauncher"
                 class ="org.springframework.batch.core.launch.support.SimpleJobLauncher">
         <property name="jobRepository" ref="jobRepository"/>
@@ -33,6 +36,7 @@
     <bean id = "jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
       <property name="transactionManager" ref="transactionManager"/>
     </bean>
+
     <bean id = "simpleJob" class="org.springframework.batch.core.job.SimpleJob" abstract="true">
         <property name="jobRepository" ref="jobRepository"/>
 
@@ -40,23 +44,29 @@
 
 
     <bean id = "symbolFieldSetMapper" class="ch.genidea.otr.importer.mapper.EquityFieldSetMapper"/>
-    
+
+    <!-- here we can define which is the delimiter of the values in the file and the name of the columns -->
+    <!-- the names of the columns can change from the original names in the file -->
     <bean id = "symbolLineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
         <property name="delimiter" value=","/>
         <property name="names" value="Symbol, Name, LastSale, MarketCap, ADR TSO, IPOyear, Sector, Industry, Summary Quote, empty"/>
         
     </bean>
 
-      <bean id="simpleWriter" class="ch.genidea.otr.importer.writer.ConsoleWriter"/>
+     <!-- basic console writer -->
+     <bean id="simpleWriter" class="ch.genidea.otr.importer.writer.ConsoleWriter"/>
 
+    <!-- basic processor ... it doesn't do anything -->
      <bean id="simpleProcessor" class="ch.genidea.otr.importer.processor.SimpleProcessor"/>
 
+    <!-- -->
     <batch:step id="show">
         <tasklet transaction-manager="transactionManager">
             <chunk reader="symbolItemReader"  writer="simpleWriter" commit-interval="1"/>
         </tasklet>
     </batch:step>
 
+    <!-- here we glue together all the pieces -->
     <bean id = "simpleStep" class="org.springframework.batch.core.step.factory.SimpleStepFactoryBean">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="jobRepository"  ref="jobRepository"/>
