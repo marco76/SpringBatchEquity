@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/batch
+           http://www.springframework.org/schema/batch/spring-batch-2.2.xsd">
+
+
+    <bean id = "symbolItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" value="file:/Users/marco/Documents/test/nyse.csv"/>
+        <property name="linesToSkip" value="1"/>
+        <property name="lineMapper">
+            <bean class = "org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="fieldSetMapper" ref="symbolFieldSetMapper"/>
+                <property name="lineTokenizer" ref="symbolLineTokenizer"/>
+            </bean>
+
+        </property>
+
+
+    </bean>
+    <bean id="transactionManager"
+          class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+
+    <bean id = "jobLauncher"
+                class ="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+    </bean>
+
+    <bean id = "jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+      <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+    <bean id = "simpleJob" class="org.springframework.batch.core.job.SimpleJob" abstract="true">
+        <property name="jobRepository" ref="jobRepository"/>
+
+    </bean>
+
+
+    <bean id = "symbolFieldSetMapper" class="ch.genidea.otr.importer.mapper.EquityFieldSetMapper"/>
+    
+    <bean id = "symbolLineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <property name="delimiter" value=","/>
+        <property name="names" value="Symbol, Name, LastSale, MarketCap, ADR TSO, IPOyear, Sector, Industry, Summary Quote, empty"/>
+        
+    </bean>
+
+      <bean id="simpleWriter" class="ch.genidea.otr.importer.writer.ConsoleWriter"/>
+
+     <bean id="simpleProcessor" class="ch.genidea.otr.importer.processor.SimpleProcessor"/>
+
+    <batch:step id="show">
+        <tasklet transaction-manager="transactionManager">
+            <chunk reader="symbolItemReader"  writer="simpleWriter" commit-interval="1"/>
+        </tasklet>
+    </batch:step>
+
+    <bean id = "simpleStep" class="org.springframework.batch.core.step.factory.SimpleStepFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="jobRepository"  ref="jobRepository"/>
+        <property name="itemReader" ref="symbolItemReader"/>
+        <property name="itemProcessor"  ref="simpleProcessor"/>
+        <property name="itemWriter" ref="simpleWriter"/>
+        <property name="commitInterval" value="1"/>
+    </bean>
+
+    <bean id="importJob" parent="simpleJob">
+        <property name="steps">
+            <list>
+                <ref bean="simpleStep"/>
+            </list>
+        </property>
+    </bean>
+
+
+</beans>
