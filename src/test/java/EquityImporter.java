@@ -24,8 +24,8 @@ public class EquityImporter {
 
     @Test
     public void testJob() throws Exception{
-        JobParametersBuilder builder = new JobParametersBuilder();
+         JobParametersBuilder builder = new JobParametersBuilder();
         JobExecution jobExecution = jobLauncher.run(job, builder.toJobParameters());
         assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
-    }
+        }
 }

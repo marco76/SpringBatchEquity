@@ -7,10 +7,14 @@
        http://www.springframework.org/schema/batch
            http://www.springframework.org/schema/batch/spring-batch-2.2.xsd">
 
+    <bean id="multiResourceReader" class="org.springframework.batch.item.file.MultiResourceItemReader">
+        <property name="resources" value="classpath*:/*.csv"/>
+        <property name="delegate" ref="symbolItemReader"/>
+    </bean>
     <!-- spring already has a standard flat file reader -->
     <bean id = "symbolItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
         <!-- the name of the file in the resources directory that contains the symbols -->
-        <property name="resource" value="nyse.csv"/>
+
         <!-- the first line contains the name of the columns, skip it -->
         <property name="linesToSkip" value="1"/>
         <!-- we use a default line mapper, each line is transformed in a predefined bean -->
@@ -35,6 +39,7 @@
 
     <bean id = "jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
       <property name="transactionManager" ref="transactionManager"/>
+       <property name="isolationLevelForCreate" value="ISOLATION_DEFAULT"/>
     </bean>
 
     <bean id = "simpleJob" class="org.springframework.batch.core.job.SimpleJob" abstract="true">
@@ -66,14 +71,18 @@
         </tasklet>
     </batch:step>
 
+    <bean id="jpaBatchWriter" class = "org.springframework.batch.item.database.JpaItemWriter">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
     <!-- here we glue together all the pieces -->
     <bean id = "simpleStep" class="org.springframework.batch.core.step.factory.SimpleStepFactoryBean">
         <property name="transactionManager" ref="transactionManager"/>
         <property name="jobRepository"  ref="jobRepository"/>
-        <property name="itemReader" ref="symbolItemReader"/>
+        <property name="itemReader" ref="multiResourceReader"/>
         <property name="itemProcessor"  ref="simpleProcessor"/>
-        <property name="itemWriter" ref="simpleWriter"/>
-        <property name="commitInterval" value="1"/>
+        <property name="itemWriter" ref="jpaBatchWriter"/>
+        <property name="commitInterval" value="10"/>
     </bean>
 
     <bean id="importJob" parent="simpleJob">
@@ -84,5 +93,5 @@
         </property>
     </bean>
 
-
+   <import resource="spring-database.xml"/>
 </beans>

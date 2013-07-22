@@ -1,19 +1,37 @@
 package ch.genidea.otr.importer.bean;
 
 
+import javax.persistence.*;
+
 /**
  * This class represent the company record that can be downloaded from nasdaq.com
  */
 
+@Entity(name = "equities")
 public class EquityImporter {
+
+    @Id
+    @Column
     private String symbol;
+
+    @Column
     private String name;
+
     private String lastSale;
     private String marketCap;
     private String adrTso;
+
+    @Column
     private String ipoYear;
+
+
+    @Column
     private String sector;
+
+    @Column
     private String industry;
+
+    @Column
     private String summaryQuote;
 
     public String getSymbol() {
@@ -87,4 +105,5 @@ public class EquityImporter {
     public void setSummaryQuote(String summaryQuote) {
         this.summaryQuote = summaryQuote;
     }
+
 }
