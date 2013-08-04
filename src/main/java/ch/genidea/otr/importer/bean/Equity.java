@@ -1,14 +1,17 @@
 package ch.genidea.otr.importer.bean;
 
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.io.Serializable;
 
 /**
  * This class represent the company record that can be downloaded from nasdaq.com
  */
 
 @Entity(name = "equities")
-public class EquityImporter {
+public class Equity implements Serializable{
 
     @Id
     @Column
@@ -33,6 +36,12 @@ public class EquityImporter {
 
     @Column
     private String summaryQuote;
+
+    @Column
+    private Boolean optionsFound;
+
+    @Column
+    private Boolean excludedFromShowing = Boolean.FALSE;
 
     public String getSymbol() {
         return symbol;
@@ -106,4 +115,24 @@ public class EquityImporter {
         this.summaryQuote = summaryQuote;
     }
 
+
+    public Boolean isOptionsFound() {
+        return optionsFound;
+    }
+
+    public void setOptionsFound(Boolean optionsFound) {
+        this.optionsFound = optionsFound;
+    }
+
+    public Boolean getOptionsFound() {
+        return optionsFound;
+    }
+
+    public Boolean getExcludedFromShowing() {
+        return excludedFromShowing;
+    }
+
+    public void setExcludedFromShowing(Boolean excludedFromShowing) {
+        this.excludedFromShowing = excludedFromShowing;
+    }
 }

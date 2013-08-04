@@ -1,12 +1,17 @@
 package ch.genidea.otr.repositories;
 
-import ch.genidea.otr.importer.bean.EquityImporter;
-import org.springframework.data.jpa.repository.JpaRepository;
+import ch.genidea.otr.importer.bean.Equity;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface EquityImporterRepository extends JpaRepository<EquityImporter, Long> {
+public interface EquityImporterRepository extends CrudRepository<Equity, Long> {
 
-    List<EquityImporter> findBySymbol(String symbol);
+    public Equity findBySymbol(String symbol);
+
+    @Query("select e from equities as e where e.excludedFromShowing = true or e.excludedFromShowing is null and e.optionsFound = true")
+    public List<Equity> findEquitiesForOptions();
+
 
 }

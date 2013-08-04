@@ -1,6 +1,6 @@
 package ch.genidea.otr.importer.service;
 
-import ch.genidea.otr.importer.bean.EquityImporter;
+import ch.genidea.otr.importer.bean.Equity;
 import ch.genidea.otr.repositories.EquityImporterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ public class RepositoryEquityService implements EquityService{
 
     @Override
     @Transactional
-    public EquityImporter create(EquityImporter equityImporter){
+    public Equity create(Equity equityImporter){
         return repository.save(equityImporter);
     }
 
